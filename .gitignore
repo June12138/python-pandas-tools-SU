@@ -172,3 +172,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# ~$开头的excel临时文件
+~$*.xlsx
