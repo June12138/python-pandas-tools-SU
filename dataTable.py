@@ -38,14 +38,20 @@ class MyDF(pd.DataFrame):
         out_difB = MyDF(pd.DataFrame(columns=self.columns))
         out_add = MyDF(pd.DataFrame(columns=self.columns))
         out_remove = MyDF(pd.DataFrame(columns=self.columns))
+        # 找到有修改的行数
         for i in common_ids:
             selfRow = self[self[self.idField] == i]
             otherRow = other[other[self.idField] == i]
             if not selfRow.equals(otherRow):
-                out_difA = pd.concat([out_difA, selfRow])
-                out_difB = pd.concat([out_difB, otherRow])
+                for i in selfRow:
+                    if selfRow[i].item() != otherRow[i].item():
+                        out_difA = pd.concat([out_difA, selfRow])
+                        out_difB = pd.concat([out_difB, otherRow])
+                        break
+        # 找到B表中增加的行数
         for idx in added_rows:
             out_add = pd.concat([out_add, other[other[other.idField] == idx]])
+        # 找到B表中删除的行数
         for idx in removed_rows:
             out_remove = pd.concat([out_remove, self[self[self.idField] == idx]])
         output['diffA'] = out_difA
