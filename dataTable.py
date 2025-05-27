@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import Union, List, Optional
 
 class MyDF(pd.DataFrame):
     idField = 'ID'
@@ -22,12 +21,11 @@ class MyDF(pd.DataFrame):
         for i in range(0,len(other)):
             otherIDList.append(other.iloc[i][self.idField].item())
         common_ids = []
+        removed_rows = []
         for id in selfIDList:
             if id in otherIDList:
                 common_ids.append(id)
-        removed_rows = []
-        for id in selfIDList:
-            if id not in common_ids:
+            else:
                 removed_rows.append(id)
         added_rows = []
         for id in otherIDList:
