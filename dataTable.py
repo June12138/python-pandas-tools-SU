@@ -61,8 +61,10 @@ class ExTable(MyDF):
     def __init__(self, path, sheetName, skipRows = [], idField = "ID"):
         super().__init__(pd.read_excel(path, sheet_name = sheetName, skiprows=skipRows))
         self.idField = idField
+        self.path = path
 
 class CSVTable(MyDF):
     def __init__(self, path, skipRows = [], idField = "---"):
         super().__init__(pd.read_csv(path, skiprows=skipRows))
         self.idField = idField
+        self.path = path
