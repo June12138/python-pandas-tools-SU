@@ -17,9 +17,9 @@ class MyDF(pd.DataFrame):
         selfIDList = []
         otherIDList = []
         for i in range(0,len(self)):
-            selfIDList.append(self.iloc[i][self.idField].item())
+            selfIDList.append(self.iloc[i][self.idField])
         for i in range(0,len(other)):
-            otherIDList.append(other.iloc[i][self.idField].item())
+            otherIDList.append(other.iloc[i][self.idField])
         common_ids = []
         removed_rows = []
         for id in selfIDList:
@@ -58,13 +58,12 @@ class MyDF(pd.DataFrame):
         output['remove'] = out_remove
         return output
 class ExTable(MyDF):
-    def __init__(self, path, sheetName, skipRows = [], idField = "ID"):
-        super().__init__(pd.read_excel(path, sheet_name = sheetName, skiprows=skipRows))
+    def __init__(self, path, sheetName, skipRows = [], idField = "ID", dtype = str):
+        super().__init__(pd.read_excel(path, sheet_name = sheetName, skiprows=skipRows, dtype = dtype))
         self.idField = idField
         self.path = path
-
 class CSVTable(MyDF):
-    def __init__(self, path, skipRows = [], idField = "---"):
-        super().__init__(pd.read_csv(path, skiprows=skipRows))
+    def __init__(self, path, skipRows = [], idField = "---", dtype = str):
+        super().__init__(pd.read_csv(path, skiprows=skipRows, dtype = dtype))
         self.idField = idField
         self.path = path
