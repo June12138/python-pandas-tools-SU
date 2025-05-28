@@ -7,9 +7,9 @@ class MyDF(pd.DataFrame):
     def QuickSearch(self, searchField, searchKey, returnKey):
         return self[self[searchField] == searchKey].iloc[0][returnKey]
     def SearchContain(self, searchField, searchKey, returnKey):
-        for i in range(0,len(self)):
+        for i in range(0, len(self)):
             currentRow = self.iloc[i]
-            if (searchKey in str(currentRow[searchField])):
+            if searchKey in str(currentRow[searchField]):
                 return currentRow[returnKey]
     def Compare(self, other):
         output = {}
@@ -31,42 +31,62 @@ class MyDF(pd.DataFrame):
         for id in otherIDList:
             if id not in common_ids:
                 added_rows.append(id)
-        # 不同、添加、和删除的输出变量
+
+        # Initialize output DataFrames
         out_difA = MyDF(pd.DataFrame(columns=self.columns))
-        out_difB = MyDF(pd.DataFrame(columns=self.columns))
-        out_add = MyDF(pd.DataFrame(columns=self.columns))
+        out_difB = MyDF(pd.DataFrame(columns=other.columns))
+        out_add = MyDF(pd.DataFrame(columns=other.columns))
         out_remove = MyDF(pd.DataFrame(columns=self.columns))
-        # 找到有修改的行数
+        out_difA['_diff_cols'] = pd.Series(dtype=object)
+        out_difB['_diff_cols'] = pd.Series(dtype=object)
+
+        # Find differing rows
         for i in common_ids:
-            selfRow = self[self[self.idField] == i]
-            otherRow = other[other[self.idField] == i]
-            if not selfRow.equals(otherRow):
-                for i in selfRow:
-                    val1, val2 = None, None
-                    try: val1, val2 = selfRow[i].item(), otherRow[i].item()
-                    except: pass
-                    if val1 != val2:
-                        out_difA = pd.concat([out_difA, selfRow])
-                        out_difB = pd.concat([out_difB, otherRow])
-                        break
-        # 找到B表中增加的行数
+            self_row = self[self[self.idField] == i].copy()  # Create a copy to avoid SettingWithCopyWarning
+            other_row = other[other[other.idField] == i].copy()
+            diff_cols = []
+            for col in self_row.columns:
+                if col == self.idField:
+                    continue
+                val1, val2 = None, None
+                try:
+                    val1, val2 = self_row[col].iloc[0], other_row[col].iloc[0]
+                except:
+                    pass
+                if pd.isna(val1) and pd.isna(val2):
+                    continue
+                if val1 != val2:
+                    diff_cols.append(col)
+            if diff_cols:
+                try:
+                    self_row['_diff_cols'] = [diff_cols]
+                    other_row['_diff_cols'] = [diff_cols]
+                    out_difA = pd.concat([out_difA, self_row], ignore_index=True)
+                    out_difB = pd.concat([out_difB, other_row], ignore_index=True)
+                except:pass
+
+        # Find added rows
         for idx in added_rows:
-            out_add = pd.concat([out_add, other[other[other.idField] == idx]])
-        # 找到B表中删除的行数
+            out_add = pd.concat([out_add, other[other[other.idField] == idx]], ignore_index=True)
+
+        # Find removed rows
         for idx in removed_rows:
-            out_remove = pd.concat([out_remove, self[self[self.idField] == idx]])
+            out_remove = pd.concat([out_remove, self[self[self.idField] == idx]], ignore_index=True)
+
         output['diffA'] = out_difA
         output['diffB'] = out_difB
         output['add'] = out_add
         output['remove'] = out_remove
         return output
+
 class ExTable(MyDF):
-    def __init__(self, path, sheetName, skipRows = [], idField = "ID", dtype = str):
-        super().__init__(pd.read_excel(path, sheet_name = sheetName, skiprows=skipRows, dtype = dtype))
+    def __init__(self, path, sheetName, skipRows=None, idField="ID", dtype=str):
+        super().__init__(pd.read_excel(path, sheet_name=sheetName, skiprows=skipRows, dtype=dtype))
         self.idField = idField
         self.path = path
+
 class CSVTable(MyDF):
-    def __init__(self, path, skipRows = [], idField = "---", dtype = str):
-        super().__init__(pd.read_csv(path, skiprows=skipRows, dtype = dtype))
+    def __init__(self, path, skipRows=None, idField="---", dtype=str):
+        super().__init__(pd.read_csv(path, skiprows=skipRows, dtype=dtype))
         self.idField = idField
         self.path = path
