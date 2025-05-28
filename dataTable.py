@@ -42,7 +42,10 @@ class MyDF(pd.DataFrame):
             otherRow = other[other[self.idField] == i]
             if not selfRow.equals(otherRow):
                 for i in selfRow:
-                    if selfRow[i].item() != otherRow[i].item():
+                    val1, val2 = None, None
+                    try: val1, val2 = selfRow[i].item(), otherRow[i].item()
+                    except: pass
+                    if val1 != val2:
                         out_difA = pd.concat([out_difA, selfRow])
                         out_difB = pd.concat([out_difB, otherRow])
                         break
