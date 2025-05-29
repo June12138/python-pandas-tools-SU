@@ -63,7 +63,10 @@ class MyDF(pd.DataFrame):
                     other_row['_diff_cols'] = [diff_cols]
                     out_difA = pd.concat([out_difA, self_row], ignore_index=True)
                     out_difB = pd.concat([out_difB, other_row], ignore_index=True)
-                except:pass
+                except:
+                    print('check duplicated ID in: ' + self_row['ID'])
+                    print([diff_cols])
+                    print()
 
         # Find added rows
         for idx in added_rows:
