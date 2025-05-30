@@ -1,4 +1,5 @@
 import pandas as pd
+from dash import dash_table
 
 class MyDF(pd.DataFrame):
     def __init__(self, *args, **kwargs):
@@ -101,3 +102,11 @@ class MyDF(pd.DataFrame):
         output['add'] = out_add
         output['remove'] = out_remove
         return output
+def PDToDash(df, maxHeight = '500px', maxWidth = '1500px'):
+    style_table={
+        'overflowX': 'auto',
+        'overflowY': 'auto',
+        'maxHeight': maxHeight,
+        'maxWidth': maxWidth, 
+    }
+    return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_table = style_table, )
