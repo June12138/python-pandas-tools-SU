@@ -1,7 +1,27 @@
 import pandas as pd
 
 class MyDF(pd.DataFrame):
-    idField = 'ID'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.idField = None
+        self.path = None
+    @classmethod
+    def from_excel(cls, path, sheet_name, skipRows=None, idField="ID", dtype=str):
+        # 读取Excel
+        df = pd.read_excel(path, sheet_name=sheet_name, skiprows=skipRows, dtype=dtype)
+        # 创建MyDF实例
+        instance = cls(df)
+        instance.idField = idField
+        instance.path = path
+        return instance
+    @classmethod
+    def from_csv(cls, path, skipRows=None, idField="---", dtype=str):
+        # 读取CSV
+        df = pd.read_csv(path, skiprows=skipRows, dtype=dtype)
+        instance = cls(df)
+        instance.idField = idField
+        instance.path = path
+        return instance
     def GetRowByID(self, id):
         return self[self[self.idField] == id]
     def QuickSearch(self, searchField, searchKey, returnKey):
@@ -81,15 +101,3 @@ class MyDF(pd.DataFrame):
         output['add'] = out_add
         output['remove'] = out_remove
         return output
-
-class ExTable(MyDF):
-    def __init__(self, path, sheetName, skipRows=None, idField="ID", dtype=str):
-        super().__init__(pd.read_excel(path, sheet_name=sheetName, skiprows=skipRows, dtype=dtype))
-        self.idField = idField
-        self.path = path
-
-class CSVTable(MyDF):
-    def __init__(self, path, skipRows=None, idField="---", dtype=str):
-        super().__init__(pd.read_csv(path, skiprows=skipRows, dtype=dtype))
-        self.idField = idField
-        self.path = path
